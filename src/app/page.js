@@ -1,6 +1,7 @@
 
 export default function Home() {
-  return (
+  console.log('if')
+    return (
     <div >
       <p>Markus </p>
     </div>
