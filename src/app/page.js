@@ -1,85 +1,58 @@
 'use client';
 
-import { useEffect, useState } from "react";
+        import { useEffect, useState } from "react";
 
-export default function MauMauGame() {
-  const [deckId, setDeckId] = useState(null);
-  const [newCards, setNewCards] = useState([]);
+        export default function BlackJackGame() {
+          const [deck, setDeck] = useState([]); // Stores all cards from 6 decks
+          const [drawnCards, setDrawnCards] = useState([]); // Stores cards drawn during the game
 
-  const [playerHand, setPlayerHand] = useState([])
-  const [dealerHand, setDealerHand] = useState([])
+          // Fetch and shuffle 6 decks at the start
+          useEffect(() => {
+            fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6")
+              .then((response) => response.json())
+              .then((data) => {
+                fetch(`https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=312`) // 6 decks = 312 cards
+                  .then((response) => response.json())
+                  .then((data) => {
+                    setDeck(data.cards); // Store all cards locally
+                  });
+              })
+              .catch((error) => {
+                console.error("Error initializing the deck:", error);
+              });
+          }, []);
 
-    useEffect(() => {
-    fetch("https://deckofcardsapi.com/api/deck/new/")
-        .then((response) => response.json())
-        .then((data) => {
-          setDeckId(data.deck_id);
-          console.log("Deck ID:", data.deck_id);
-        })
-        .catch((error) => {
-          console.error("Fehler beim Laden des Decks:", error);
-        });
+          // Draw a random card from the local deck
+          const drawRandomCard = () => {
+            if (deck.length === 0) {
+              console.error("No cards left in the deck!");
+              return;
+            }
 
-    fetch("https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=3")
-        .then((response) => response.json())
-        .then((data) => {
-            setDealerHand(data.cards);
-          console.log("Deck ID:", data.cards);
-        })
-        .catch((error) => {
-          console.error("Fehler beim Laden des Decks:", error);
-        });
+            const randomIndex = Math.floor(Math.random() * deck.length);
+            const card = deck[randomIndex];
 
-  }, []);
+            // Remove the drawn card from the deck
+            setDeck((prevDeck) => prevDeck.filter((_, index) => index !== randomIndex));
+            setDrawnCards((prevCards) => [...prevCards, card]);
+          };
 
-  const getNewCard = () => {
-    fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=3`)
-        .then((response) => response.json())
-        .then((data) => {
-          setNewCards(data.cards);
-        })
-        .catch((error) => {
-          console.error("Fehler beim Ziehen der Karten:", error);
-        });
-  };
-
-  return (
-      <>
-          <div className={'dealer'}>
-              <p className={'name'}>Dealer</p>
-              <button onClick={getNewCard}>
-                  Karte holenesvdvsdvsddsv
+          return (
+            <>
+              <button onClick={drawRandomCard}>
+                Karte ziehen
               </button>
-              {dealerHand.length > 0 && (
-                  <div style={{display: "flex", gap: "1rem", marginTop: "1rem"}}>
-                      {dealerHand.map((card) => (
-                          <img
-                              key={card.code}
-                              src={card.image}
-                              alt={`${card.value} of ${card.suit}`}
-                              width={100}
-                          />
-                      ))}
-                  </div>
-              )}
 
-
-          </div>
-
-          <div className={'player'}>
-              <p className={'name'}>Player</p>
-
-              <div style={{display: "flex", gap: "1rem", marginTop: "1rem"}}>
-                  {deckId.map((card) => (
-                      <img
-                          key={card.code}
-                          src={card.image}
-                          alt={`${card.value} of ${card.suit}`}
-                          width={100}
-                      />
-                  ))}
+              <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+                {drawnCards.map((card) => (
+                  <img
+                    key={card.code}
+                    src={card.image}
+                    alt={`${card.value} of ${card.suit}`}
+                    width={100}
+                  />
+                ))}
               </div>
-          </div>
-      </>
-  );
-}
+            </>
+          );
+        }
