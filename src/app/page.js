@@ -6,8 +6,11 @@ export default function MauMauGame() {
   const [deckId, setDeckId] = useState(null);
   const [newCards, setNewCards] = useState([]);
 
-  useEffect(() => {
-    fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
+  const [playerHand, setPlayerHand] = useState([])
+  const [dealerHand, setDealerHand] = useState([])
+
+    useEffect(() => {
+    fetch("https://deckofcardsapi.com/api/deck/new/")
         .then((response) => response.json())
         .then((data) => {
           setDeckId(data.deck_id);
@@ -16,11 +19,20 @@ export default function MauMauGame() {
         .catch((error) => {
           console.error("Fehler beim Laden des Decks:", error);
         });
+
+    fetch("https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=3")
+        .then((response) => response.json())
+        .then((data) => {
+            setDealerHand(data.cards);
+          console.log("Deck ID:", data.cards);
+        })
+        .catch((error) => {
+          console.error("Fehler beim Laden des Decks:", error);
+        });
+
   }, []);
 
   const getNewCard = () => {
-    if (!deckId) return;
-
     fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=3`)
         .then((response) => response.json())
         .then((data) => {
@@ -33,20 +45,41 @@ export default function MauMauGame() {
 
   return (
       <>
-        <button onClick={getNewCard}>
-          Karte holenesvdvsdvsddsv
-        </button>
+          <div className={'dealer'}>
+              <p className={'name'}>Dealer</p>
+              <button onClick={getNewCard}>
+                  Karte holenesvdvsdvsddsv
+              </button>
+              {dealerHand.length > 0 && (
+                  <div style={{display: "flex", gap: "1rem", marginTop: "1rem"}}>
+                      {dealerHand.map((card) => (
+                          <img
+                              key={card.code}
+                              src={card.image}
+                              alt={`${card.value} of ${card.suit}`}
+                              width={100}
+                          />
+                      ))}
+                  </div>
+              )}
 
-        <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-          {newCards.map((card) => (
-              <img
-                  key={card.code}
-                  src={card.image}
-                  alt={`${card.value} of ${card.suit}`}
-                  width={100}
-              />
-          ))}
-        </div>
+
+          </div>
+
+          <div className={'player'}>
+              <p className={'name'}>Player</p>
+
+              <div style={{display: "flex", gap: "1rem", marginTop: "1rem"}}>
+                  {deckId.map((card) => (
+                      <img
+                          key={card.code}
+                          src={card.image}
+                          alt={`${card.value} of ${card.suit}`}
+                          width={100}
+                      />
+                  ))}
+              </div>
+          </div>
       </>
   );
 }
