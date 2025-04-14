@@ -7,7 +7,7 @@ export default function BlackJackGame() {
     const [drawnCards, setDrawnCards] = useState([]); // Stores cards drawn during the game
     const [score, setScore] = useState(0); // Stores the total score
 
-    // Fetch and shuffle 6 decks at the start
+    // 6 decks ziehen und mischen
     useEffect(() => {
         fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6")
             .then((response) => response.json())
@@ -23,7 +23,7 @@ export default function BlackJackGame() {
             });
     }, []);
 
-    // Calculate the value of a card
+    // Wert der Karte berechnen
     const calculateCardValue = (card) => {
         if (["KING", "QUEEN", "JACK"].includes(card.value)) {
             return 10;
@@ -34,7 +34,7 @@ export default function BlackJackGame() {
         }
     };
 
-    // Draw a random card from the local deck
+    // Random Karte von Decks ziehen
     const drawRandomCard = () => {
         if (deck.length === 0) {
             console.error("No cards left in the deck!");
@@ -44,11 +44,9 @@ export default function BlackJackGame() {
         const randomIndex = Math.floor(Math.random() * deck.length);
         const card = deck[randomIndex];
 
-        // Remove the drawn card from the deck
         setDeck((prevDeck) => prevDeck.filter((_, index) => index !== randomIndex));
         setDrawnCards((prevCards) => [...prevCards, card]);
 
-        // Update the score
         setScore((prevScore) => prevScore + calculateCardValue(card));
     };
 
