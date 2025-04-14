@@ -10,6 +10,7 @@
                        const [dealerScore, setDealerScore] = useState(0); // Dealer-Punktzahl
                        const [gameOver, setGameOver] = useState(false); // Spielstatus
                        const [playerStand, setPlayerStand] = useState(false); // Spieler hat gestanden
+                       const [result, setResult] = useState(""); // Ergebnis des Spiels
 
                        // 6 Decks ziehen und mischen
                        useEffect(() => {
@@ -62,7 +63,10 @@
                        const drawPlayerCard = () => {
                            if (!gameOver && !playerStand) {
                                const newScore = drawRandomCard(setPlayerCards, setPlayerScore, playerScore);
-                               if (newScore > 21) setGameOver(true); // Spieler Bust
+                               if (newScore > 21) {
+                                   setGameOver(true);
+                                   setResult("Bust! Du hast verloren.");
+                               }
                            }
                        };
 
@@ -78,6 +82,15 @@
                                    setTimeout(drawDealerCards, 1000); // 1 Sekunde Verzögerung
                                } else {
                                    setGameOver(true); // Spielende nach Dealer-Zug
+                                   if (dealerCurrentScore > 21) {
+                                       setResult("Dealer Bust! Du hast gewonnen.");
+                                   } else if (playerScore > dealerCurrentScore) {
+                                       setResult("Du hast gewonnen!");
+                                   } else if (playerScore < dealerCurrentScore) {
+                                       setResult("Du hast verloren.");
+                                   } else {
+                                       setResult("Unentschieden!");
+                                   }
                                }
                            };
 
@@ -97,7 +110,7 @@
 
                                <div style={{ marginTop: "1rem" }}>
                                    <strong>Deine Punktzahl: {playerScore}</strong>
-                                   {gameOver && playerScore > 21 && <p style={{ color: "red" }}>Bust! Du hast über 21 Punkte.</p>}
+                                   {gameOver && <p style={{ color: "red" }}>{result}</p>}
                                </div>
 
                                <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
@@ -115,7 +128,6 @@
                                    <>
                                        <div style={{ marginTop: "2rem" }}>
                                            <strong>Dealer Punktzahl: {dealerScore}</strong>
-                                           {gameOver && dealerScore > 21 && <p style={{ color: "red" }}>Dealer Bust! Über 21 Punkte.</p>}
                                        </div>
 
                                        <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
