@@ -53,11 +53,11 @@ export default function BlackJackGame() {
     return (
         <>
             <button onClick={drawRandomCard}>
-                Draw Card
+                Karte ziehen
             </button>
 
             <div style={{marginTop: "1rem"}}>
-                <strong>Total Score: {score}</strong>
+                <strong>Deine Punktzahl: {score}</strong>
             </div>
 
             <div style={{display: "flex", gap: "1rem", marginTop: "1rem"}}>
