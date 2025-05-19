@@ -13,6 +13,7 @@ export default function BlackJackGame() {
     const [playerStand, setPlayerStand] = useState(false); // Spieler hat gestanden
     const [result, setResult] = useState(""); // Ergebnis des Spiels
     const [loading, setLoading] = useState(true); // Ladezustand des Decks
+    const [isNewGamePossible, setIsNewGamePossible] = useState(true);
 
     // Initialisiere das Deck
     useEffect(() => {
@@ -30,6 +31,8 @@ export default function BlackJackGame() {
             .catch((error) => {
                 console.error("Fehler beim Initialisieren des Decks:", error);
             });
+        console.log("gameOver", gameOver);
+        console.log("loading", loading);
     }, []);
 
     // Kartenwert berechnen
@@ -65,11 +68,13 @@ export default function BlackJackGame() {
 
     // Spieler-Karte ziehen
     const drawPlayerCard = () => {
+        setIsNewGamePossible(false);
         if (!gameOver && !playerStand) {
             const newScore = drawRandomCard(setPlayerCards, setPlayerScore, playerScore);
             if (newScore > 21) {
                 setGameOver(true);
                 setResult("Bust! Du hast verloren.");
+                setIsNewGamePossible(true);
             }
         }
     };
@@ -85,6 +90,7 @@ export default function BlackJackGame() {
                 setTimeout(drawDealerCards, 1000); // 1 Sekunde Verzögerung
             } else {
                 setGameOver(true);
+                setIsNewGamePossible(true)
                 if (dealerCurrentScore > 21) {
                     setResult("Dealer Bust! Du hast gewonnen.");
                 } else if (playerScore > dealerCurrentScore) {
@@ -130,7 +136,7 @@ export default function BlackJackGame() {
                 <button onClick={handleStand} disabled={gameOver || playerStand || loading}>
                     Stand
                 </button>
-                <button onClick={startNewGame} disabled={!gameOver || loading}>
+                <button onClick={startNewGame} disabled={gameOver && loading || !isNewGamePossible}>
                     Neues Spiel starten
                 </button>
             </div>
