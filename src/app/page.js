@@ -1,21 +1,21 @@
 'use client';
+import "./blackjack.css"
 
 import {useEffect, useState} from "react";
 
 export default function BlackJackGame() {
-    const [deck, setDeck] = useState([]); // Speichert alle Karten aus 6 Decks
-    const [deckId, setDeckId] = useState(""); // Speichert die Deck-ID
-    const [playerCards, setPlayerCards] = useState([]); // Spieler-Karten
-    const [dealerCards, setDealerCards] = useState([]); // Dealer-Karten
-    const [playerScore, setPlayerScore] = useState(0); // Spieler-Punktzahl
-    const [dealerScore, setDealerScore] = useState(0); // Dealer-Punktzahl
-    const [gameOver, setGameOver] = useState(false); // Spielstatus
-    const [playerStand, setPlayerStand] = useState(false); // Spieler hat gestanden
-    const [result, setResult] = useState(""); // Ergebnis des Spiels
-    const [loading, setLoading] = useState(true); // Ladezustand des Decks
+    const [deck, setDeck] = useState([]);
+    const [deckId, setDeckId] = useState("");
+    const [playerCards, setPlayerCards] = useState([]);
+    const [dealerCards, setDealerCards] = useState([]);
+    const [playerScore, setPlayerScore] = useState(0);
+    const [dealerScore, setDealerScore] = useState(0);
+    const [gameOver, setGameOver] = useState(false);
+    const [playerStand, setPlayerStand] = useState(false);
+    const [result, setResult] = useState("");
+    const [loading, setLoading] = useState(true);
     const [isNewGamePossible, setIsNewGamePossible] = useState(true);
 
-    // Initialisiere das Deck
     useEffect(() => {
         fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6")
             .then((response) => response.json())
@@ -24,8 +24,8 @@ export default function BlackJackGame() {
                 fetch(`https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=312`)
                     .then((response) => response.json())
                     .then((data) => {
-                        setDeck(data.cards); // Karten lokal speichern
-                        setLoading(false); // Deck ist geladen
+                        setDeck(data.cards);
+                        setLoading(false);
                     });
             })
             .catch((error) => {
@@ -35,18 +35,16 @@ export default function BlackJackGame() {
         console.log("loading", loading);
     }, []);
 
-    // Kartenwert berechnen
     const calculateCardValue = (card, currentScore) => {
         if (["KING", "QUEEN", "JACK"].includes(card.value)) {
             return 10;
         } else if (card.value === "ACE") {
-            return currentScore + 11 > 21 ? 1 : 11; // Ass als 1 oder 11
+            return currentScore + 11 > 21 ? 1 : 11;
         } else {
             return parseInt(card.value, 10);
         }
     };
 
-    // Zufällige Karte ziehen
     const drawRandomCard = (setCards, setScore, currentScore) => {
         if (deck.length === 0) {
             console.error("Keine Karten mehr im Deck!");
@@ -66,7 +64,6 @@ export default function BlackJackGame() {
         return newScore;
     };
 
-    // Spieler-Karte ziehen
     const drawPlayerCard = () => {
         setIsNewGamePossible(false);
         if (!gameOver && !playerStand) {
@@ -79,7 +76,6 @@ export default function BlackJackGame() {
         }
     };
 
-    // Spieler steht
     const handleStand = () => {
         setPlayerStand(true);
         let dealerCurrentScore = dealerScore;
@@ -87,7 +83,7 @@ export default function BlackJackGame() {
         const drawDealerCards = () => {
             if (dealerCurrentScore < 17) {
                 dealerCurrentScore = drawRandomCard(setDealerCards, setDealerScore, dealerCurrentScore);
-                setTimeout(drawDealerCards, 1000); // 1 Sekunde Verzögerung
+                setTimeout(drawDealerCards, 1000);
             } else {
                 setGameOver(true);
                 setIsNewGamePossible(true)
@@ -106,29 +102,30 @@ export default function BlackJackGame() {
         drawDealerCards();
     };
 
-    // Neues Spiel starten
     const startNewGame = () => {
-        setLoading(true); // Ladezustand aktivieren
+        setLoading(true);
         fetch(`https://deckofcardsapi.com/api/deck/${deckId}/shuffle/?remaining=true`)
             .then((response) => response.json())
             .then(() => {
-                setPlayerCards([]); // Spieler-Karten zurücksetzen
-                setDealerCards([]); // Dealer-Karten zurücksetzen
-                setPlayerScore(0); // Spieler-Punktzahl zurücksetzen
-                setDealerScore(0); // Dealer-Punktzahl zurücksetzen
-                setGameOver(false); // Spielstatus zurücksetzen
-                setPlayerStand(false); // Spieler-Stand zurücksetzen
-                setResult(""); // Ergebnis zurücksetzen
-                setLoading(false); // Ladezustand deaktivieren
+                setPlayerCards([]);
+                setDealerCards([]);
+                setPlayerScore(0);
+                setDealerScore(0);
+                setGameOver(false);
+                setPlayerStand(false);
+                setResult("");
+                setLoading(false);
             })
             .catch((error) => {
                 console.error("Fehler beim Mischen des Decks:", error);
-                setLoading(false); // Ladezustand deaktivieren
+                setLoading(false);
             });
     };
 
     return (
-        <>
+        <div className="game-area">
+            <h1>Blackjack</h1>
+
             <div>
                 <button onClick={drawPlayerCard} disabled={gameOver || playerStand || loading}>
                     Karte ziehen
@@ -141,12 +138,12 @@ export default function BlackJackGame() {
                 </button>
             </div>
 
-            <div style={{marginTop: "1rem"}}>
+            <div className="scoreboard">
                 <strong>Deine Punktzahl: {playerScore}</strong>
-                {gameOver && <p style={{color: "red"}}>{result}</p>}
+                {gameOver && <div className="result">{result}</div>}
             </div>
 
-            <div style={{display: "flex", gap: "1rem", marginTop: "1rem"}}>
+            <div className="card-row">
                 {playerCards.map((card) => (
                     <img
                         key={card.code}
@@ -159,11 +156,11 @@ export default function BlackJackGame() {
 
             {playerStand && (
                 <>
-                    <div style={{marginTop: "2rem"}}>
+                    <div className="scoreboard" style={{ marginTop: "2rem" }}>
                         <strong>Dealer Punktzahl: {dealerScore}</strong>
                     </div>
 
-                    <div style={{display: "flex", gap: "1rem", marginTop: "1rem"}}>
+                    <div className="card-row">
                         {dealerCards.map((card) => (
                             <img
                                 key={card.code}
@@ -175,6 +172,6 @@ export default function BlackJackGame() {
                     </div>
                 </>
             )}
-        </>
+        </div>
     );
 }
