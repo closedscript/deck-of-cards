@@ -1,0 +1,95 @@
+/* blackjack.css */
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: radial-gradient(circle at center, #1c1c1c 0%, #111 100%);
+    color: #f8f8f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.game-area {
+    background: #222;
+    border: 3px solid gold;
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 900px;
+    width: 95%;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+    text-align: center;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    color: gold;
+    text-shadow: 0 0 5px gold;
+}
+
+button {
+    background: #444;
+    border: 2px solid gold;
+    color: gold;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    margin: 0.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.4);
+}
+
+button:hover:not(:disabled) {
+    background: gold;
+    color: #222;
+    box-shadow: 0 0 15px gold;
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.scoreboard {
+    font-size: 1.5rem;
+    margin: 1rem 0;
+    color: #fefefe;
+}
+
+.result {
+    margin-top: 0.5rem;
+    font-size: 1.3rem;
+    color: gold;
+    text-shadow: 0 0 5px gold;
+}
+
+.card-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.card-row img {
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.card-row img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px gold;
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+}
