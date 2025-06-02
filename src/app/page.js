@@ -1,7 +1,7 @@
 'use client';
-import "./blackjack.css"
+import "./blackjack.css";
 
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 export default function BlackJackGame() {
     const [deck, setDeck] = useState([]);
@@ -14,12 +14,15 @@ export default function BlackJackGame() {
     const [playerStand, setPlayerStand] = useState(false);
     const [result, setResult] = useState("");
     const [loading, setLoading] = useState(true);
+    const [money, setMoney] = useState(1000);
+    const [bet, setBet] = useState(0);
+    const [betPlaced, setBetPlaced] = useState(false);
 
     useEffect(() => {
         fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6")
             .then((response) => response.json())
             .then((data) => {
-                setDeckId(data.deck_id); // Speichere die Deck-ID
+                setDeckId(data.deck_id);
                 fetch(`https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=312`)
                     .then((response) => response.json())
                     .then((data) => {
@@ -30,8 +33,6 @@ export default function BlackJackGame() {
             .catch((error) => {
                 console.error("Fehler beim Initialisieren des Decks:", error);
             });
-        console.log("gameOver", gameOver);
-        console.log("loading", loading);
     }, []);
 
     const calculateCardValue = (card, currentScore) => {
@@ -47,7 +48,7 @@ export default function BlackJackGame() {
     const drawRandomCard = (setCards, setScore, currentScore) => {
         if (deck.length === 0) {
             console.error("Keine Karten mehr im Deck!");
-            return;
+            return currentScore;
         }
 
         const randomIndex = Math.floor(Math.random() * deck.length);
@@ -64,7 +65,7 @@ export default function BlackJackGame() {
     };
 
     const drawPlayerCard = () => {
-        if (!gameOver && !playerStand) {
+        if (!gameOver && !playerStand && betPlaced) {
             const newScore = drawRandomCard(setPlayerCards, setPlayerScore, playerScore);
             if (newScore > 21) {
                 setGameOver(true);
@@ -74,6 +75,8 @@ export default function BlackJackGame() {
     };
 
     const handleStand = () => {
+        if (!betPlaced) return;
+
         setPlayerStand(true);
         let dealerCurrentScore = dealerScore;
 
@@ -83,19 +86,32 @@ export default function BlackJackGame() {
                 setTimeout(drawDealerCards, 1000);
             } else {
                 setGameOver(true);
+
                 if (dealerCurrentScore > 21) {
                     setResult("Dealer Bust! Du hast gewonnen.");
+                    setMoney(prev => prev + bet * 2);
                 } else if (playerScore > dealerCurrentScore) {
                     setResult("Du hast gewonnen!");
+                    setMoney(prev => prev + bet * 2);
                 } else if (playerScore < dealerCurrentScore) {
                     setResult("Du hast verloren.");
+                    // Kein Geld zurück
                 } else {
                     setResult("Unentschieden!");
+                    setMoney(prev => prev + bet); // Einsatz zurück
                 }
             }
         };
 
         drawDealerCards();
+    };
+
+    const placeBet = (amount) => {
+        if (money >= amount && !betPlaced && !loading) {
+            setMoney(prev => prev - amount);
+            setBet(amount);
+            setBetPlaced(true);
+        }
     };
 
     const startNewGame = () => {
@@ -110,6 +126,8 @@ export default function BlackJackGame() {
                 setGameOver(false);
                 setPlayerStand(false);
                 setResult("");
+                setBet(0);
+                setBetPlaced(false);
                 setLoading(false);
             })
             .catch((error) => {
@@ -122,11 +140,14 @@ export default function BlackJackGame() {
         <div className="game-area">
             <h1>Blackjack</h1>
 
+            <p>Geld: {money} €</p>
+            <p>Einsatz: {bet} €</p>
+
             <div>
-                <button onClick={drawPlayerCard} disabled={gameOver || playerStand || loading}>
+                <button onClick={drawPlayerCard} disabled={gameOver || playerStand || loading || !betPlaced}>
                     Karte ziehen
                 </button>
-                <button onClick={handleStand} disabled={gameOver || playerStand || loading}>
+                <button onClick={handleStand} disabled={gameOver || playerStand || loading || !betPlaced}>
                     Stand
                 </button>
                 <button onClick={startNewGame} disabled={!gameOver || loading}>
@@ -152,7 +173,7 @@ export default function BlackJackGame() {
 
             {playerStand && (
                 <>
-                    <div className="scoreboard" style={{marginTop: "2rem"}}>
+                    <div className="scoreboard" style={{ marginTop: "2rem" }}>
                         <strong>Dealer Punktzahl: {dealerScore}</strong>
                     </div>
 
@@ -168,6 +189,14 @@ export default function BlackJackGame() {
                     </div>
                 </>
             )}
+
+            <br />
+            <div>
+                <button onClick={() => placeBet(5)} disabled={betPlaced || loading || money < 5}>5.- CHF</button>
+                <button onClick={() => placeBet(10)} disabled={betPlaced || loading || money < 10}>10.- CHF</button>
+                <button onClick={() => placeBet(50)} disabled={betPlaced || loading || money < 50}>50.- CHF</button>
+                <button onClick={() => placeBet(100)} disabled={betPlaced || loading || money < 100}>100.- CHF</button>
+            </div>
         </div>
     );
 }
