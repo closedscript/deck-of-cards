@@ -14,7 +14,6 @@ export default function BlackJackGame() {
     const [playerStand, setPlayerStand] = useState(false);
     const [result, setResult] = useState("");
     const [loading, setLoading] = useState(true);
-    const [isNewGamePossible, setIsNewGamePossible] = useState(true);
 
     useEffect(() => {
         fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6")
@@ -65,13 +64,11 @@ export default function BlackJackGame() {
     };
 
     const drawPlayerCard = () => {
-        setIsNewGamePossible(false);
         if (!gameOver && !playerStand) {
             const newScore = drawRandomCard(setPlayerCards, setPlayerScore, playerScore);
             if (newScore > 21) {
                 setGameOver(true);
                 setResult("Bust! Du hast verloren.");
-                setIsNewGamePossible(true);
             }
         }
     };
@@ -86,7 +83,6 @@ export default function BlackJackGame() {
                 setTimeout(drawDealerCards, 1000);
             } else {
                 setGameOver(true);
-                setIsNewGamePossible(true)
                 if (dealerCurrentScore > 21) {
                     setResult("Dealer Bust! Du hast gewonnen.");
                 } else if (playerScore > dealerCurrentScore) {
@@ -133,7 +129,7 @@ export default function BlackJackGame() {
                 <button onClick={handleStand} disabled={gameOver || playerStand || loading}>
                     Stand
                 </button>
-                <button onClick={startNewGame} disabled={gameOver && loading || !isNewGamePossible}>
+                <button onClick={startNewGame} disabled={!gameOver || loading}>
                     Neues Spiel starten
                 </button>
             </div>
