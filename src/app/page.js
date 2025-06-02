@@ -153,16 +153,6 @@ export default function BlackJackGame() {
                     />
                 ))}
             </div>
-            <div className="quellfrisch-banner">
-                <img
-                    src="https://shop.brauereilocher.ch/assets/images/7/Qu%C3%B6llfrisch%20hell%20Award-ffb47401.png"
-                    alt="Quöllfrisch Logo"
-                    className="quellfrisch-logo"
-                />
-                <p className="quellfrisch-text">Erfrischend. Echt. Appenzeller.<br/>Jetzt ein Quöllfrisch – auch beim
-                    Blackjack.</p>
-            </div>
-
 
             {playerStand && (
                 <>

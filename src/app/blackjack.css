@@ -84,35 +84,6 @@ button:disabled {
     transform: scale(1.05);
     box-shadow: 0 0 20px gold;
 }
-.quellfrisch-banner {
-    margin-top: 3rem;
-    padding: 1rem;
-    border-top: 2px solid gold;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    animation: glow 5s infinite ease-in-out;
-}
-
-.quellfrisch-logo {
-    width: 150px;
-    height: auto;
-    filter: drop-shadow(0 0 8px gold);
-    margin-bottom: 1rem;
-    transition: transform 0.3s ease;
-}
-
-.quellfrisch-logo:hover {
-    transform: scale(1.1) rotate(-2deg);
-}
-
-.quellfrisch-text {
-    font-family: 'Georgia', serif;
-    color: gold;
-    font-size: 1.2rem;
-    text-align: center;
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.6);
-}
 
 @keyframes glow {
     0%, 100% {
