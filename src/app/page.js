@@ -1,203 +1,215 @@
 'use client';
 import "./blackjack.css";
-
 import { useEffect, useState } from "react";
 
 export default function BlackJackGame() {
-    const [deck, setDeck] = useState([]);
     const [deckId, setDeckId] = useState("");
+    const [deck, setDeck] = useState([]);
     const [playerCards, setPlayerCards] = useState([]);
     const [dealerCards, setDealerCards] = useState([]);
     const [dealerHiddenCard, setDealerHiddenCard] = useState(null);
-    const [dealerHiddenCardImage, setDealerHiddenCardImage] = useState(null);
     const [playerScore, setPlayerScore] = useState(0);
     const [dealerScore, setDealerScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [playerStand, setPlayerStand] = useState(false);
     const [result, setResult] = useState("");
-    const [loading, setLoading] = useState(true);
     const [money, setMoney] = useState(1000);
     const [bet, setBet] = useState(0);
     const [betPlaced, setBetPlaced] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    const drawCard = () => {
+        if (deck.length === 0) return null;
+        const card = deck[0];
+        setDeck(deck.slice(1));
+        return card;
+    };
+
+    const calculateHandValue = (cards) => {
+        let score = 0;
+        let aces = 0;
+        for (const card of cards) {
+            if (!card) continue;
+            if (["KING", "QUEEN", "JACK"].includes(card.value)) score += 10;
+            else if (card.value === "ACE") {
+                aces += 1;
+                score += 11;
+            } else {
+                score += Number(card.value);
+            }
+        }
+        while (score > 21 && aces > 0) {
+            score -= 10;
+            aces--;
+        }
+        return score;
+    };
 
     useEffect(() => {
-        fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6")
-            .then((response) => response.json())
-            .then((data) => {
-                setDeckId(data.deck_id);
-                fetch(`https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=312`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        setDeck(data.cards);
-                        setLoading(false);
-                    });
-            })
-            .catch((error) => {
-                console.error("Fehler beim Initialisieren des Decks:", error);
-            });
+        async function initDeck() {
+            setLoading(true);
+            try {
+                const res1 = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6");
+                const data1 = await res1.json();
+                setDeckId(data1.deck_id);
+
+                const res2 = await fetch(`https://deckofcardsapi.com/api/deck/${data1.deck_id}/draw/?count=312`);
+                const data2 = await res2.json();
+                setDeck(data2.cards);
+            } catch (e) {
+                console.error(e);
+            }
+            setLoading(false);
+        }
+        initDeck();
     }, []);
 
-    const calculateCardValue = (card, currentScore) => {
-        if (!card || !card.value) return 0;
+    const startGame = () => {
+        if (!betPlaced || loading) return;
 
-        if (["KING", "QUEEN", "JACK"].includes(card.value)) {
-            return 10;
-        } else if (card.value === "ACE") {
-            return currentScore + 11 > 21 ? 1 : 11;
-        } else {
-            return parseInt(card.value, 10);
-        }
-    };
+        const p1 = drawCard();
+        const p2 = drawCard();
+        const d1 = drawCard();
+        const d2 = drawCard();
 
-    const drawRandomCard = (setCards, setScore, currentScore) => {
-        if (deck.length === 0) {
-            console.error("Keine Karten mehr im Deck!");
-            return currentScore;
-        }
+        setPlayerCards([p1, p2]);
+        setDealerCards([d1]);
+        setDealerHiddenCard(d2);
 
-        const randomIndex = Math.floor(Math.random() * deck.length);
-        const card = deck[randomIndex];
+        const playerInitialScore = calculateHandValue([p1, p2]);
+        const dealerInitialScore = calculateHandValue([d1, d2]);
 
-        setDeck((prevDeck) => prevDeck.filter((_, index) => index !== randomIndex));
-        setCards((prevCards) => [...prevCards, card]);
+        setPlayerScore(playerInitialScore);
+        setDealerScore(calculateHandValue([d1]));
 
-        const cardValue = calculateCardValue(card, currentScore);
-        const newScore = currentScore + cardValue;
+        setGameOver(false);
+        setPlayerStand(false);
+        setResult("");
 
-        setScore(newScore);
-        return newScore;
-    };
-
-    const dealInitialCards = async () => {
-        let newPlayerScore = 0;
-        let dealerVisibleScore = 0;
-
-        for (let i = 0; i < 2; i++) {
-            newPlayerScore = drawRandomCard(setPlayerCards, setPlayerScore, newPlayerScore);
-        }
-
-        dealerVisibleScore = drawRandomCard(setDealerCards, setDealerScore, dealerVisibleScore);
-
-        if (deckId) {
-            try {
-                const response = await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=1`);
-                const data = await response.json();
-                const hiddenCard = data.cards[0];
-                setDealerHiddenCard(hiddenCard);
-                const hiddenCardValue = calculateCardValue(hiddenCard, dealerVisibleScore);
-                dealerVisibleScore += hiddenCardValue;
-                setDealerScore(dealerVisibleScore);
-            } catch (error) {
-                console.error("Fehler beim Ziehen der verdeckten Karte:", error);
-            }
-        }
-
-        setPlayerScore(newPlayerScore);
-
-        if (newPlayerScore === 21) {
-            setPlayerStand(true);
-            handleStand();
-        }
-    };
-
-    const drawPlayerCard = () => {
-        if (!gameOver && !playerStand && betPlaced) {
-            const newScore = drawRandomCard(setPlayerCards, setPlayerScore, playerScore);
-            if (newScore >= 21) {
-                if (newScore === 21) {
-                    setPlayerStand(true);
-                    handleStand();
-                } else {
-                    setGameOver(true);
-                    setResult("Bust! Du hast verloren.");
-                }
-            }
-        }
-    };
-
-    const handleStand = () => {
-        if (!betPlaced) return;
-
-        setPlayerStand(true);
-        let dealerCurrentScore = dealerScore;
-
-        if (dealerHiddenCard) {
-            setDealerCards(prev => [...prev, dealerHiddenCard]);
-            setDealerHiddenCard(null);
-        }
-
-        const drawDealerCards = () => {
-            if (dealerCurrentScore < 17) {
-                dealerCurrentScore = drawRandomCard(setDealerCards, setDealerScore, dealerCurrentScore);
-                setTimeout(drawDealerCards, 1000);
+        if (playerInitialScore === 21) {
+            if (dealerInitialScore === 21) {
+                setGameOver(true);
+                setPlayerStand(true);
+                setDealerCards([d1, d2]);
+                setDealerHiddenCard(null);
+                setDealerScore(21);
+                setResult("Beide haben Blackjack! Unentschieden.");
+                setMoney(m => m + bet);
             } else {
                 setGameOver(true);
-
-                if (dealerCurrentScore > 21) {
-                    setResult("Dealer Bust! Du hast gewonnen.");
-                    setMoney(prev => prev + bet * 2);
-                } else if (playerScore > dealerCurrentScore) {
-                    setResult("Du hast gewonnen!");
-                    setMoney(prev => prev + bet * 2);
-                } else if (playerScore < dealerCurrentScore) {
-                    setResult("Du hast verloren.");
-                } else {
-                    setResult("Unentschieden!");
-                    setMoney(prev => prev + bet);
-                }
+                setPlayerStand(true);
+                setDealerCards([d1, d2]);
+                setDealerHiddenCard(null);
+                setDealerScore(dealerInitialScore);
+                setResult("Blackjack! Du hast gewonnen!");
+                setMoney(m => m + Math.floor(bet * 2.5));
             }
-        };
+        }
+    };
 
-        drawDealerCards();
+    const playerHit = () => {
+        if (gameOver || playerStand || !betPlaced) return;
+
+        const card = drawCard();
+        if (!card) return;
+        const newPlayerCards = [...playerCards, card];
+        setPlayerCards(newPlayerCards);
+
+        const score = calculateHandValue(newPlayerCards);
+        setPlayerScore(score);
+
+        if (score > 21) {
+            setGameOver(true);
+            setResult("Bust! Du hast verloren.");
+        } else if (score === 21) {
+            setGameOver(true);
+            setPlayerStand(true);
+            dealerPlay([...dealerCards, dealerHiddenCard], score);
+        }
+    };
+
+    const playerStandClick = () => {
+        if (gameOver || playerStand || !betPlaced) return;
+
+        setPlayerStand(true);
+        dealerPlay([...dealerCards, dealerHiddenCard], playerScore);
+    };
+
+    const dealerPlay = async (dealerHand, playerFinalScore) => {
+        setDealerCards(dealerHand);
+        setDealerHiddenCard(null);
+
+        let score = calculateHandValue(dealerHand);
+        setDealerScore(score);
+
+        while (score < 17) {
+            await new Promise((res) => setTimeout(res, 800));
+            const card = drawCard();
+            if (!card) break;
+            dealerHand = [...dealerHand, card];
+            setDealerCards(dealerHand);
+            score = calculateHandValue(dealerHand);
+            setDealerScore(score);
+        }
+
+        setGameOver(true);
+
+        if (score > 21) {
+            setResult("Dealer Bust! Du hast gewonnen.");
+            setMoney(m => m + bet * 2);
+        } else if (playerFinalScore > score) {
+            setResult("Du hast gewonnen!");
+            setMoney(m => m + bet * 2);
+        } else if (playerFinalScore < score) {
+            setResult("Du hast verloren.");
+        } else {
+            setResult("Unentschieden!");
+            setMoney(m => m + bet);
+        }
     };
 
     const placeBet = (amount) => {
         if (money >= amount && !betPlaced && !loading) {
-            setMoney(prev => prev - amount);
+            setMoney(m => m - amount);
             setBet(amount);
             setBetPlaced(true);
-            dealInitialCards();
         }
     };
 
-    const startNewGame = () => {
-        setLoading(true);
-        fetch(`https://deckofcardsapi.com/api/deck/${deckId}/shuffle/?remaining=true`)
-            .then((response) => response.json())
-            .then(() => {
-                setPlayerCards([]);
-                setDealerCards([]);
-                setDealerHiddenCard(null);
-                setPlayerScore(0);
-                setDealerScore(0);
-                setGameOver(false);
-                setPlayerStand(false);
-                setResult("");
-                setBet(0);
-                setBetPlaced(false);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Fehler beim Mischen des Decks:", error);
-                setLoading(false);
-            });
+    const newGame = () => {
+        setPlayerCards([]);
+        setDealerCards([]);
+        setDealerHiddenCard(null);
+        setPlayerScore(0);
+        setDealerScore(0);
+        setGameOver(false);
+        setPlayerStand(false);
+        setResult("");
+        setBet(0);
+        setBetPlaced(false);
     };
+
+    useEffect(() => {
+        if (betPlaced) {
+            startGame();
+        }
+    }, [betPlaced]);
 
     return (
         <div className="game-area">
             <h1>Blackjack</h1>
 
-            <p>Geld: {money} €</p>
-            <p>Einsatz: {bet} €</p>
+            <p>Geld: {money}.- CHF</p>
+            <p>Einsatz: {bet}.- CHF</p>
 
             <div>
-                <button onClick={drawPlayerCard} disabled={gameOver || playerStand || loading || !betPlaced}>
+                <button onClick={playerHit} disabled={gameOver || playerStand || loading || !betPlaced}>
                     Karte ziehen
                 </button>
-                <button onClick={handleStand} disabled={gameOver || playerStand || loading || !betPlaced}>
+                <button onClick={playerStandClick} disabled={gameOver || playerStand || loading || !betPlaced}>
                     Stand
                 </button>
-                <button onClick={startNewGame} disabled={!gameOver || loading}>
+                <button onClick={newGame} disabled={!gameOver || loading}>
                     Neues Spiel starten
                 </button>
             </div>
@@ -208,61 +220,40 @@ export default function BlackJackGame() {
             </div>
 
             <div className="card-row">
-                {playerCards.map((card, index) => (
-                    <img
-                        key={card.code + index}
-                        src={card.image}
-                        alt={`${card.value} of ${card.suit}`}
-                        width={100}
-                    />
+                {playerCards.map((card, idx) => (
+                    <img key={card.code + idx} src={card.image} alt={`${card.value} of ${card.suit}`} width={100} />
                 ))}
             </div>
 
-            {(playerStand || gameOver) ? (
-                <>
-                    <div className="scoreboard" style={{ marginTop: "2rem" }}>
-                        <strong>Dealer Punktzahl: {dealerScore}</strong>
-                    </div>
-                    <div className="card-row">
-                        {dealerCards.map((card, index) => (
-                            <img
-                                key={card.code + index}
-                                src={card.image}
-                                alt={`${card.value} of ${card.suit}`}
-                                width={100}
-                            />
-                        ))}
-                    </div>
-                </>
-            ) : (
-                <>
-                    <div className="scoreboard" style={{ marginTop: "2rem" }}>
-                        <strong>Dealer zeigt:</strong>
-                    </div>
-                    <div className="card-row">
-                        {dealerCards.map((card, index) => (
-                            <img
-                                key={card.code + index}
-                                src={card.image}
-                                alt={`${card.value} of ${card.suit}`}
-                                width={100}
-                            />
-                        ))}
-                        <img
-                            src="https://deckofcardsapi.com/static/img/back.png"
-                            alt="Verdeckte Karte"
-                            width={100}
-                        />
-                    </div>
-                </>
-            )}
+            <div className="scoreboard" style={{ marginTop: "2rem" }}>
+                <strong>Dealer Punktzahl: {dealerScore}</strong>
+            </div>
+
+            <div className="card-row">
+                {dealerCards.map((card, idx) => (
+                    <img key={card.code + idx} src={card.image} alt={`${card.value} of ${card.suit}`} width={100} />
+                ))}
+
+                {!playerStand && !gameOver && dealerHiddenCard && (
+                    <img src="https://deckofcardsapi.com/static/img/back.png" alt="Verdeckte Karte" width={100} />
+                )}
+            </div>
 
             <br />
+
             <div>
-                <button onClick={() => placeBet(5)} disabled={betPlaced || loading || money < 5}>5.- CHF</button>
-                <button onClick={() => placeBet(10)} disabled={betPlaced || loading || money < 10}>10.- CHF</button>
-                <button onClick={() => placeBet(50)} disabled={betPlaced || loading || money < 50}>50.- CHF</button>
-                <button onClick={() => placeBet(100)} disabled={betPlaced || loading || money < 100}>100.- CHF</button>
+                <button onClick={() => placeBet(5)} disabled={betPlaced || loading || money < 5}>
+                    5.- CHF
+                </button>
+                <button onClick={() => placeBet(10)} disabled={betPlaced || loading || money < 10}>
+                    10.- CHF
+                </button>
+                <button onClick={() => placeBet(50)} disabled={betPlaced || loading || money < 50}>
+                    50.- CHF
+                </button>
+                <button onClick={() => placeBet(100)} disabled={betPlaced || loading || money < 100}>
+                    100.- CHF
+                </button>
             </div>
         </div>
     );
