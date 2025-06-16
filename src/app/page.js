@@ -8,6 +8,8 @@ export default function BlackJackGame() {
     const [deckId, setDeckId] = useState("");
     const [playerCards, setPlayerCards] = useState([]);
     const [dealerCards, setDealerCards] = useState([]);
+    const [dealerHiddenCard, setDealerHiddenCard] = useState(null);
+    const [dealerHiddenCardImage, setDealerHiddenCardImage] = useState(null);
     const [playerScore, setPlayerScore] = useState(0);
     const [dealerScore, setDealerScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
@@ -36,6 +38,8 @@ export default function BlackJackGame() {
     }, []);
 
     const calculateCardValue = (card, currentScore) => {
+        if (!card || !card.value) return 0;
+
         if (["KING", "QUEEN", "JACK"].includes(card.value)) {
             return 10;
         } else if (card.value === "ACE") {
@@ -64,16 +68,49 @@ export default function BlackJackGame() {
         return newScore;
     };
 
+    const dealInitialCards = async () => {
+        let newPlayerScore = 0;
+        let dealerVisibleScore = 0;
+
+        for (let i = 0; i < 2; i++) {
+            newPlayerScore = drawRandomCard(setPlayerCards, setPlayerScore, newPlayerScore);
+        }
+
+        dealerVisibleScore = drawRandomCard(setDealerCards, setDealerScore, dealerVisibleScore);
+
+        if (deckId) {
+            try {
+                const response = await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=1`);
+                const data = await response.json();
+                const hiddenCard = data.cards[0];
+                setDealerHiddenCard(hiddenCard);
+                const hiddenCardValue = calculateCardValue(hiddenCard, dealerVisibleScore);
+                dealerVisibleScore += hiddenCardValue;
+                setDealerScore(dealerVisibleScore);
+            } catch (error) {
+                console.error("Fehler beim Ziehen der verdeckten Karte:", error);
+            }
+        }
+
+        setPlayerScore(newPlayerScore);
+
+        if (newPlayerScore === 21) {
+            setPlayerStand(true);
+            handleStand();
+        }
+    };
+
     const drawPlayerCard = () => {
         if (!gameOver && !playerStand && betPlaced) {
             const newScore = drawRandomCard(setPlayerCards, setPlayerScore, playerScore);
-            if (newScore > 21) {
-                setGameOver(true);
-                setResult("Bust! Du hast verloren.");
-            } else if (newScore === 21) {
-                // Automatisch Stand machen, wenn 21 erreicht
-                setPlayerStand(true);
-                handleStand();
+            if (newScore >= 21) {
+                if (newScore === 21) {
+                    setPlayerStand(true);
+                    handleStand();
+                } else {
+                    setGameOver(true);
+                    setResult("Bust! Du hast verloren.");
+                }
             }
         }
     };
@@ -83,6 +120,11 @@ export default function BlackJackGame() {
 
         setPlayerStand(true);
         let dealerCurrentScore = dealerScore;
+
+        if (dealerHiddenCard) {
+            setDealerCards(prev => [...prev, dealerHiddenCard]);
+            setDealerHiddenCard(null);
+        }
 
         const drawDealerCards = () => {
             if (dealerCurrentScore < 17) {
@@ -101,7 +143,7 @@ export default function BlackJackGame() {
                     setResult("Du hast verloren.");
                 } else {
                     setResult("Unentschieden!");
-                    setMoney(prev => prev + bet); // Einsatz zurück
+                    setMoney(prev => prev + bet);
                 }
             }
         };
@@ -114,6 +156,7 @@ export default function BlackJackGame() {
             setMoney(prev => prev - amount);
             setBet(amount);
             setBetPlaced(true);
+            dealInitialCards();
         }
     };
 
@@ -124,6 +167,7 @@ export default function BlackJackGame() {
             .then(() => {
                 setPlayerCards([]);
                 setDealerCards([]);
+                setDealerHiddenCard(null);
                 setPlayerScore(0);
                 setDealerScore(0);
                 setGameOver(false);
@@ -174,12 +218,11 @@ export default function BlackJackGame() {
                 ))}
             </div>
 
-            {playerStand && (
+            {(playerStand || gameOver) ? (
                 <>
                     <div className="scoreboard" style={{ marginTop: "2rem" }}>
                         <strong>Dealer Punktzahl: {dealerScore}</strong>
                     </div>
-
                     <div className="card-row">
                         {dealerCards.map((card, index) => (
                             <img
@@ -189,6 +232,27 @@ export default function BlackJackGame() {
                                 width={100}
                             />
                         ))}
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="scoreboard" style={{ marginTop: "2rem" }}>
+                        <strong>Dealer zeigt:</strong>
+                    </div>
+                    <div className="card-row">
+                        {dealerCards.map((card, index) => (
+                            <img
+                                key={card.code + index}
+                                src={card.image}
+                                alt={`${card.value} of ${card.suit}`}
+                                width={100}
+                            />
+                        ))}
+                        <img
+                            src="https://deckofcardsapi.com/static/img/back.png"
+                            alt="Verdeckte Karte"
+                            width={100}
+                        />
                     </div>
                 </>
             )}
