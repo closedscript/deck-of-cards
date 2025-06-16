@@ -70,6 +70,10 @@ export default function BlackJackGame() {
             if (newScore > 21) {
                 setGameOver(true);
                 setResult("Bust! Du hast verloren.");
+            } else if (newScore === 21) {
+                // Automatisch Stand machen, wenn 21 erreicht
+                setPlayerStand(true);
+                handleStand();
             }
         }
     };
@@ -95,7 +99,6 @@ export default function BlackJackGame() {
                     setMoney(prev => prev + bet * 2);
                 } else if (playerScore < dealerCurrentScore) {
                     setResult("Du hast verloren.");
-                    // Kein Geld zurück
                 } else {
                     setResult("Unentschieden!");
                     setMoney(prev => prev + bet); // Einsatz zurück
@@ -161,9 +164,9 @@ export default function BlackJackGame() {
             </div>
 
             <div className="card-row">
-                {playerCards.map((card) => (
+                {playerCards.map((card, index) => (
                     <img
-                        key={card.code}
+                        key={card.code + index}
                         src={card.image}
                         alt={`${card.value} of ${card.suit}`}
                         width={100}
@@ -178,9 +181,9 @@ export default function BlackJackGame() {
                     </div>
 
                     <div className="card-row">
-                        {dealerCards.map((card) => (
+                        {dealerCards.map((card, index) => (
                             <img
-                                key={card.code}
+                                key={card.code + index}
                                 src={card.image}
                                 alt={`${card.value} of ${card.suit}`}
                                 width={100}
