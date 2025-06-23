@@ -2,8 +2,6 @@
 import "./blackjack.css";
 import { useEffect, useState } from "react";
 
-// TODO RHo: Karten besser gemischt
-
 export default function BlackJackGame() {
     const [deckId, setDeckId] = useState("");
     const [deck, setDeck] = useState([]);
