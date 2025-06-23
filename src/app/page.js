@@ -2,6 +2,8 @@
 import "./blackjack.css";
 import { useEffect, useState } from "react";
 
+// TODO RHo: Karten besser gemischt
+
 export default function BlackJackGame() {
     const [deckId, setDeckId] = useState("");
     const [deck, setDeck] = useState([]);
@@ -49,7 +51,7 @@ export default function BlackJackGame() {
         async function initDeck() {
             setLoading(true);
             try {
-                const res1 = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6");
+                const res1 = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1");
                 const data1 = await res1.json();
                 setDeckId(data1.deck_id);
 
