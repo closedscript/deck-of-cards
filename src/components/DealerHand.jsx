@@ -5,11 +5,23 @@ export default function DealerHand({ cards, hiddenCard, score, showHidden }) {
                 <strong>Dealer Punktzahl: {score}</strong>
             </div>
             <div className="card-row">
-                {cards.map((card, idx) => (
-                    <img key={card.code + idx} src={card.image} alt={`${card.value} of ${card.suit}`} width={100} />
-                ))}
+                {cards.map((card, idx) => {
+                    if (!card) return null;
+                    return (
+                        <img
+                            key={card.code + idx}
+                            src={card.image}
+                            alt={`${card.value} of ${card.suit}`}
+                            width={100}
+                        />
+                    );
+                })}
                 {!showHidden && hiddenCard && (
-                    <img src="https://deckofcardsapi.com/static/img/back.png" alt="Verdeckte Karte" width={100} />
+                    <img
+                        src="https://deckofcardsapi.com/static/img/back.png"
+                        alt="Verdeckte Karte"
+                        width={100}
+                    />
                 )}
             </div>
         </>

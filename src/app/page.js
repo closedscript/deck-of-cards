@@ -33,6 +33,23 @@ export default function BlackJackGame() {
             });
         });
 
+    useEffect(() => {
+        if (deck.length <= 10) {
+            console.warn('Deck is running low, fetching a new one...');
+            (async () => {
+                try {
+                    const res1 = await fetch('https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1');
+                    const data1 = await res1.json();
+                    const res2 = await fetch(`https://deckofcardsapi.com/api/deck/${data1.deck_id}/draw/?count=312`);
+                    const data2 = await res2.json();
+                    setDeck(data2.cards);
+                } catch (err) {
+                    console.error('Fehler beim Nachladen des Decks:', err);
+                }
+            })();
+        }
+    }, [deck]);
+
     const calculateHandValue = (cards) => {
         let score = 0;
         let aces = 0;
@@ -208,7 +225,7 @@ export default function BlackJackGame() {
                 playerStand={playerStand}
             />
 
-            <PlayerHand cards={playerCards} score={playerScore} result={result} gameOver={gameOver} />
+            <PlayerHand playerCards={playerCards} score={playerScore} result={result} gameOver={gameOver} />
             <DealerHand cards={dealerCards} hiddenCard={dealerHiddenCard} score={dealerScore} showHidden={playerStand || gameOver} />
         </div>
     );
