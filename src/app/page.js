@@ -3,7 +3,6 @@ import "./blackjack.css";
 import { useEffect, useState } from "react";
 
 export default function BlackJackGame() {
-    const [deckId, setDeckId] = useState("");
     const [deck, setDeck] = useState([]);
     const [playerCards, setPlayerCards] = useState([]);
     const [dealerCards, setDealerCards] = useState([]);
@@ -18,11 +17,18 @@ export default function BlackJackGame() {
     const [betPlaced, setBetPlaced] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const drawCard = () => {
-        if (deck.length === 0) return null;
-        const card = deck[0];
-        setDeck(deck.slice(1));
-        return card;
+    const drawCard = async () => {
+        return new Promise((resolve) => {
+            setDeck(prevDeck => {
+                if (prevDeck.length === 0) {
+                    resolve(null);
+                    return prevDeck;
+                }
+                const card = prevDeck[0];
+                resolve(card);
+                return prevDeck.slice(1);
+            });
+        });
     };
 
     const calculateHandValue = (cards) => {
@@ -51,7 +57,6 @@ export default function BlackJackGame() {
             try {
                 const res1 = await fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1");
                 const data1 = await res1.json();
-                setDeckId(data1.deck_id);
 
                 const res2 = await fetch(`https://deckofcardsapi.com/api/deck/${data1.deck_id}/draw/?count=312`);
                 const data2 = await res2.json();
@@ -64,13 +69,13 @@ export default function BlackJackGame() {
         initDeck();
     }, []);
 
-    const startGame = () => {
+    const startGame = async () => {
         if (!betPlaced || loading) return;
 
-        const p1 = drawCard();
-        const p2 = drawCard();
-        const d1 = drawCard();
-        const d2 = drawCard();
+        const p1 = await drawCard();
+        const p2 = await drawCard();
+        const d1 = await drawCard();
+        const d2 = await drawCard();
 
         setPlayerCards([p1, p2]);
         setDealerCards([d1]);
@@ -107,11 +112,12 @@ export default function BlackJackGame() {
         }
     };
 
-    const playerHit = () => {
+    const playerHit = async () => {
         if (gameOver || playerStand || !betPlaced) return;
 
-        const card = drawCard();
+        const card = await drawCard();
         if (!card) return;
+
         const newPlayerCards = [...playerCards, card];
         setPlayerCards(newPlayerCards);
 
@@ -143,8 +149,8 @@ export default function BlackJackGame() {
         setDealerScore(score);
 
         while (score < 17) {
-            await new Promise((res) => setTimeout(res, 800));
-            const card = drawCard();
+            await new Promise(res => setTimeout(res, 800));
+            const card = await drawCard();
             if (!card) break;
             dealerHand = [...dealerHand, card];
             setDealerCards(dealerHand);
@@ -191,7 +197,9 @@ export default function BlackJackGame() {
 
     useEffect(() => {
         if (betPlaced) {
-            startGame();
+            (async () => {
+                await startGame();
+            })();
         }
     }, [betPlaced]);
 
