@@ -254,6 +254,7 @@ export default function BlackJackGame() {
                 <button onClick={() => placeBet(100)} disabled={betPlaced || loading || money < 100}>
                     100.- CHF
                 </button>
+                <p>markus wurde gepackt</p>
             </div>
         </div>
     );
