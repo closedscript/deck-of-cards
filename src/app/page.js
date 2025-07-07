@@ -1,6 +1,6 @@
 'use client';
 import './blackjack.css';
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import PlayerHand from '../components/PlayerHand';
 import DealerHand from '../components/DealerHand';
 import Controls from '../components/Controls';
@@ -82,6 +82,7 @@ export default function BlackJackGame() {
             }
             setLoading(false);
         }
+
         initDeck();
     }, []);
 
@@ -225,8 +226,9 @@ export default function BlackJackGame() {
                 playerStand={playerStand}
             />
 
-            <PlayerHand playerCards={playerCards} score={playerScore} result={result} gameOver={gameOver} />
-            <DealerHand cards={dealerCards} hiddenCard={dealerHiddenCard} score={dealerScore} showHidden={playerStand || gameOver} />
+            <PlayerHand playerCards={playerCards} score={playerScore} result={result} gameOver={gameOver}/>
+            <DealerHand cards={dealerCards} hiddenCard={dealerHiddenCard} score={dealerScore}
+                        showHidden={playerStand || gameOver}/>
         </div>
     );
 }

@@ -1,4 +1,4 @@
-export default function PlayerHand({ playerCards = [], score, result, gameOver }) {
+export default function PlayerHand({playerCards = [], score}) {
     return (
         <>
             <div className="scoreboard">

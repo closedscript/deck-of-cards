@@ -1,7 +1,7 @@
-export default function DealerHand({ cards, hiddenCard, score, showHidden }) {
+export default function DealerHand({cards, hiddenCard, score, showHidden}) {
     return (
         <>
-            <div className="scoreboard" style={{ marginTop: '2rem' }}>
+            <div className="scoreboard" style={{marginTop: '2rem'}}>
                 <strong>Dealer Punktzahl: {score}</strong>
             </div>
             <div className="card-row">
