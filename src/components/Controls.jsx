@@ -1,4 +1,4 @@
-export default function Controls({ onHit, onStand, onNewGame, onBet, betPlaced, loading, money, gameOver, playerStand }) {
+export default function Controls({onHit, onStand, onNewGame, onBet, betPlaced, loading, money, gameOver, playerStand}) {
     return (
         <div>
             <button onClick={onHit} disabled={gameOver || playerStand || loading || !betPlaced}>
@@ -11,7 +11,7 @@ export default function Controls({ onHit, onStand, onNewGame, onBet, betPlaced, 
                 Neues Spiel starten
             </button>
 
-            <br /><br />
+            <br/><br/>
             <button onClick={() => onBet(5)} disabled={betPlaced || loading || money < 5}>5.- CHF</button>
             <button onClick={() => onBet(10)} disabled={betPlaced || loading || money < 10}>10.- CHF</button>
             <button onClick={() => onBet(50)} disabled={betPlaced || loading || money < 50}>50.- CHF</button>

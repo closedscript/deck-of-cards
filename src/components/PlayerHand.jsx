@@ -1,4 +1,4 @@
-export default function PlayerHand({ playerCards = [], score }) {
+export default function PlayerHand({playerCards = [], score}) {
     return (
         <>
             <div className="scoreboard">

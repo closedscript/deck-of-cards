@@ -1,95 +1,93 @@
-/* blackjack.css */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: radial-gradient(circle at center, #008000 0%, #014d26 100%);
+    color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: radial-gradient(circle at center, #008000 0%, #014d26 100%);
-            color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+.game-area {
+    background: #014d26;
+    border: 3px solid #333333;
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 900px;
+    width: 95%;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+    text-align: center;
+}
 
-        .game-area {
-            background: #014d26;
-            border: 3px solid #333333;
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 900px;
-            width: 95%;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
-            text-align: center;
-        }
+h1 {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    color: #f0f0f0;
+    text-shadow: 0 0 5px #333333;
+}
 
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            color: #f0f0f0;
-            text-shadow: 0 0 5px #333333;
-        }
+button {
+    background: #006b3c;
+    border: 2px solid #333333;
+    color: #f0f0f0;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    margin: 0.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
 
-        button {
-            background: #006b3c;
-            border: 2px solid #333333;
-            color: #f0f0f0;
-            padding: 0.75rem 1.5rem;
-            font-size: 1.1rem;
-            margin: 0.5rem;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-        }
+button:hover:not(:disabled) {
+    background: #00a152;
+    color: #ffffff;
+    box-shadow: 0 0 15px #333333;
+}
 
-        button:hover:not(:disabled) {
-            background: #00a152;
-            color: #ffffff;
-            box-shadow: 0 0 15px #333333;
-        }
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+.scoreboard {
+    font-size: 1.5rem;
+    margin: 1rem 0;
+    color: #ffffff;
+}
 
-        .scoreboard {
-            font-size: 1.5rem;
-            margin: 1rem 0;
-            color: #ffffff;
-        }
+.result {
+    margin-top: 0.5rem;
+    font-size: 1.3rem;
+    color: #ffffff;
+    text-shadow: 0 0 5px #333333;
+}
 
-        .result {
-            margin-top: 0.5rem;
-            font-size: 1.3rem;
-            color: #ffffff;
-            text-shadow: 0 0 5px #333333;
-        }
+.card-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
 
-        .card-row {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
+.card-row img {
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+    transition: transform 0.2s ease;
+}
 
-        .card-row img {
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
-            transition: transform 0.2s ease;
-        }
+.card-row img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #333333;
+}
 
-        .card-row img:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #333333;
-        }
-
-        @keyframes glow {
-            0%, 100% {
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-            }
-        }
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+}
