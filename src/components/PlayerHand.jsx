@@ -2,6 +2,11 @@ export default function PlayerHand({playerCards = [], score}) {
     return (
         <>
             <div className="scoreboard">
+                {gameOver && result && (
+                    <div className="result">
+                        <strong><i>{result}</i></strong>
+                    </div>
+                )}
                 <strong>Deine Punktzahl: {score}</strong>
             </div>
             <div className="card-row">
